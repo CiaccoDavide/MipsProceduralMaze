@@ -24,10 +24,10 @@ la $s2, labirinto 	#non serve caricare subito la default finchè non si vuole fa
 jal seed
 
 jal rand 			#GENERA la X
-add $t3, $zero, $t2
+add $t3, $zero, $t2 #salva la x in $t3
 jal rand 			#GENERA la Y
-add $t4, $zero, $t2
-
+add $t4, $zero, $t2 #salva la y in $t4
+#FORSE BISOGNEREBBE SALVARE LE COORDINATE IN UN POSTO MIGLIORE (devo poter far backtracking risalendo la stack!)
 
 #DETERMINO L'OFFSET SULLA STRINGA DEL LABIRINTO e lo salvo in $t2
 mul $t3, $t3, 2		#(2*x)
@@ -87,7 +87,6 @@ j reset 		#loop
 
 
 seed:
-
 li $v0, 4				# selezione di print_string (codice = 4)
 la $a0, string1			# $a0 = indirizzo di string1
 syscall					# lancio print_string
@@ -98,9 +97,8 @@ add $s0, $zero, $v0		# memorizzo il seed iniziale in $s0
 
 jr $ra
 
-rand:
 
-#GENERA la X
+rand:	#restituisce in $t2 un valore pseudorandom [0..3]
 srl $s1, $s0, 2			#shift a destra di 2
 xor $s0, $s0, $s1		#xor tra seed e shiftato
 sll $s1, $s0, 6			#shift a sinistra di 6
