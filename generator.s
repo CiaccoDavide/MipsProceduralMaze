@@ -5,7 +5,7 @@ labirinto: .byte 	35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35
 default: .byte 	35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,0
 
 saluto: .asciiz "\nProgramma terminato!\nCreato da Ciacco Davide 794163"
-string1: .asciiz "Inserire il seed: "
+string1: .asciiz "\nInserire il seed: "
 
 
 
@@ -34,37 +34,13 @@ la $s2, default
 
 
 
-random:
-li $v0, 4				# selezione di print_string (codice = 4)
-la $a0, string1			# $a0 = indirizzo di string1
-syscall					# lancio print_string
 
-li $v0, 5				# Selezione read_int (codice = 5)
-syscall					
-add $t0, $zero, $v0		# memorizzo il seed iniziale in $t0
+jal rand 			#GENERA la X
+add $t3, $zero, $t2
+jal rand 			#GENERA la Y
+add $t4, $zero, $t2
 
 
-#GENERA la X
-srl $t1, $t0, 2			#shift a destra di 2
-xor $t0, $t0, $t1		#xor tra seed e shiftato
-sll $t1, $t0, 6			#shift a sinistra di 6
-xor $t0, $t0, $t1		#xor tra seed e shiftato
-
-#per fare il modulo basta dividere per 4 e prendere il resto della divisione!
-div $t3, $t0, 4
-mfhi $t3
-abs $t3 $t3
-
-#GENERA la Y
-srl $t1, $t0, 2			#shift a destra di 2
-xor $t0, $t0, $t1		#xor tra seed e shiftato
-sll $t1, $t0, 6			#shift a sinistra di 6
-xor $t0, $t0, $t1		#xor tra seed e shiftato
-
-#per fare il modulo basta dividere per 4 e prendere il resto della divisione!
-div $t4, $t0, 4
-mfhi $t4
-abs $t4 $t4
 
 #DETERMINO L'OFFSET SULLA STRINGA DEL LABIRINTO e lo salvo in $t2
 mul $t3, $t3, 2		#(2*x)
@@ -119,3 +95,36 @@ addi $s1, $s1, 1
 
 j reset 		#loop
 
+
+
+
+
+
+
+
+
+
+
+
+
+rand:
+li $v0, 4				# selezione di print_string (codice = 4)
+la $a0, string1			# $a0 = indirizzo di string1
+syscall					# lancio print_string
+
+li $v0, 5				# Selezione read_int (codice = 5)
+syscall					
+add $t0, $zero, $v0		# memorizzo il seed iniziale in $t0
+
+#GENERA la X
+srl $t1, $t0, 2			#shift a destra di 2
+xor $t0, $t0, $t1		#xor tra seed e shiftato
+sll $t1, $t0, 6			#shift a sinistra di 6
+xor $t0, $t0, $t1		#xor tra seed e shiftato
+
+#per fare il modulo basta dividere per 4 e prendere il resto della divisione!
+div $t2, $t0, 4
+mfhi $t2
+abs $t2 $t2  #l'abs potrebbe essere semplice usando una xor?
+
+jr $ra
