@@ -4,6 +4,11 @@
 #	$s3 string pointer (reset default)
 #	$s4 string pointer dinamico
 
+#	$s5 contiene il contatore delle zone esplorate
+#	$s6 contiene il contatore delle posizioni da 2 a 0 {si dovrà saltare la direzione di provenienza}
+#	$s7 contiene la direzione di provenienza 
+
+
 
 
 
@@ -45,7 +50,11 @@ sb $t0, ($s4)		#salva il char nel buffer(?)
 
 
 
+li $s7, 4 #carico subito la direzione di provenienza nulla
 
+jal passo
+jal passo
+jal passo
 jal passo
 
 
@@ -159,8 +168,11 @@ li $v0, 4				# selezione di print_string
 la $a0, labirinto		# $a0 = indirizzo di string2
 syscall					# lancio print_string
 
-
+ricalcolaDirezione:
 jal rand 			#GENERA la direzione
+beq $t2, $s7, ricalcolaDirezione
+add $s7, $zero, $t2 #salvo (TEMP: da salvare nella stack per poter tornare indietro!)
+
 #$t2 contiene la direzione
 #$s4 contiene il pointer
 #$s2 contiene l'offset iniziale (pointer all'inizio della stringa labirinto)
@@ -172,11 +184,11 @@ addi $t2, $t2, -1
 beq $t2, $zero, sud 	#2:sud
 addi $t2, $t2, -1
 beq $t2, $zero, ovest 	#3:ovest
-j ExitSwitch
+j ExitSwitch	#ATTENZIONE: qui abbiamo portato $t2 a 0, quindi non possiamo più ricavarne la dir di prov per il passo successivo!
 
 nord:
 addi $t5, $s2, 20
-blt $s4, $t5, ExitSwitch	#controlla se può andare a nord
+blt $s4, $t5, ricalcolaDirezione	#controlla se può andare a nord
 addi $s4, $s4, -10
 jal dot
 addi $s4, $s4, -10
@@ -185,22 +197,22 @@ j ExitSwitch
 
 est:
 addi $t5, $s2, 17
-beq $s4, $t5, ExitSwitch	#controlla se può andare a est
+beq $s4, $t5, ricalcolaDirezione	#controlla se può andare a est
 addi $t5, $s2, 37
-beq $s4, $t5, ExitSwitch
+beq $s4, $t5, ricalcolaDirezione
 addi $t5, $s2, 57
-beq $s4, $t5, ExitSwitch
+beq $s4, $t5, ricalcolaDirezione
 addi $t5, $s2, 77
-beq $s4, $t5, ExitSwitch
-addi $s4, $s4, -1
+beq $s4, $t5, ricalcolaDirezione
+addi $s4, $s4, 1
 jal dot
-addi $s4, $s4, -1
+addi $s4, $s4, 1
 jal dot
 j ExitSwitch
 
 sud:
 addi $t5, $s2, 60
-bgt $s4, $t5, ExitSwitch	#controlla se può andare a sud
+bgt $s4, $t5, ricalcolaDirezione	#controlla se può andare a sud
 addi $s4, $s4, 10
 jal dot
 addi $s4, $s4, 10
@@ -209,13 +221,13 @@ j ExitSwitch
 
 ovest:
 addi $t5, $s2, 11
-beq $s4, $t5, ExitSwitch	#controlla se può andare a ovest
+beq $s4, $t5, ricalcolaDirezione	#controlla se può andare a ovest
 addi $t5, $s2, 31
-beq $s4, $t5, ExitSwitch
+beq $s4, $t5, ricalcolaDirezione
 addi $t5, $s2, 51
-beq $s4, $t5, ExitSwitch
+beq $s4, $t5, ricalcolaDirezione
 addi $t5, $s2, 71
-beq $s4, $t5, ExitSwitch
+beq $s4, $t5, ricalcolaDirezione
 addi $s4, $s4, -1
 jal dot
 addi $s4, $s4, -1
