@@ -36,9 +36,104 @@ add $t2, $t3, $t4	#(2*x)+(20*y)
 addi $t2, $t2, 11	#11+((2*x)+(20*y))
 
 #POSIZIONO IL PUNTO DI PARTENZA
-li $t0, 65		#carico il carattere A di partenza in $t0
+li $t0, 65			#carico il carattere A di partenza in $t0
 add $s2, $s2, $t2	#sposto il puntatore sulla casella
-sb $t0, ($s2)	#salva il char nel buffer(?)
+sb $t0, ($s2)		#salva il char nel buffer(?)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+li $v0, 4				# selezione di print_string
+la $a0, labirinto		# $a0 = indirizzo di string2
+syscall					# lancio print_string
+
+
+
+primopasso:
+jal rand 			#GENERA la direzione
+
+#$t2 contiene la direzione
+#$s2 contiene il pointer
+
+
+li $v0, 1				# selezione di print_int (codice = 1)
+add $a0,$zero,$t2		# $a0 = $t0
+syscall					# lancio print_int
+
+beq $t2, $zero, nord 	#0:nord
+addi $t2, $t2, -1
+beq $t2, $zero, est 	#1:est
+addi $t2, $t2, -1
+beq $t2, $zero, sud 	#2:sud
+addi $t2, $t2, -1
+beq $t2, $zero, ovest 	#3:ovest
+j ExitSwitch;
+
+nord:
+bgt $s2, 20, ExitSwitch
+addi $s2, $s2, -20
+j ExitSwitch
+
+est:
+beq $s2, 17, ExitSwitch
+beq $s2, 37, ExitSwitch
+beq $s2, 57, ExitSwitch
+beq $s2, 87, ExitSwitch
+addi $s2, $s2, 2
+j ExitSwitch
+
+sud:
+blt $s2, 60, ExitSwitch
+addi $s2, $s2, 20
+j ExitSwitch
+
+ovest:
+beq $s2, 11, ExitSwitch
+beq $s2, 31, ExitSwitch
+beq $s2, 51, ExitSwitch
+beq $s2, 81, ExitSwitch
+addi $s2, $s2, -2
+ExitSwitch:
+
+
+#POSIZIONO IL secondo punto
+li $t0, 65			#carico il carattere A di partenza in $t0
+sb $t0, ($s2)		#salva il char nel buffer(?)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
