@@ -56,6 +56,30 @@ jal passo
 jal passo
 jal passo
 jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
+jal passo
 
 
 
@@ -120,23 +144,27 @@ j reset 		#loop
 
 
 
-seed:
+seed:	
 li $v0, 4				# selezione di print_string (codice = 4)
 la $a0, string1			# $a0 = indirizzo di string1
 syscall					# lancio print_string
 
 li $v0, 5				# Selezione read_int (codice = 5)
-syscall					
+syscall
+
+beq $v0, $zero, seed 	#IL SEED DEVE ESSERE DIVERSO DA 0
+
 add $s0, $zero, $v0		# memorizzo il seed iniziale in $s0
+
 
 jr $ra
 
 
 
 rand:	#restituisce in $t2 un valore pseudorandom [0..3]
-srl $s1, $s0, 2			#shift a destra di 2
+srl $s1, $s0, 3			#shift a destra di 2
 xor $s0, $s0, $s1		#xor tra seed e shiftato
-sll $s1, $s0, 6			#shift a sinistra di 6
+sll $s1, $s0, 5			#shift a sinistra di 6
 xor $s0, $s0, $s1		#xor tra seed e shiftato
 #per fare il modulo basta dividere per 4 e prendere il resto della divisione!
 div $t2, $s0, 4
@@ -170,8 +198,13 @@ syscall					# lancio print_string
 
 ricalcolaDirezione:
 jal rand 			#GENERA la direzione
+
 beq $t2, $s7, ricalcolaDirezione
+
 add $s7, $zero, $t2 #salvo (TEMP: da salvare nella stack per poter tornare indietro!)
+addi $s7, $s7, 2	#calcolo l'inverso della direzione 
+div $s7, $s7, 4
+mfhi $s7
 
 #$t2 contiene la direzione
 #$s4 contiene il pointer
