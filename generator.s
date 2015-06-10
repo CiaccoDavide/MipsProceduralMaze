@@ -59,23 +59,28 @@ sb $t0, ($s2)		#salva il char nel buffer(?)
 
 
 
+
+
+
+
+
+
+
+
+passo:
+
+
+
 li $v0, 4				# selezione di print_string
 la $a0, labirinto		# $a0 = indirizzo di string2
 syscall					# lancio print_string
 
 
 
-primopasso:
-jal rand 			#GENERA la direzione
 
+jal rand 			#GENERA la direzione
 #$t2 contiene la direzione
 #$s2 contiene il pointer
-
-
-li $v0, 1				# selezione di print_int (codice = 1)
-add $a0,$zero,$t2		# $a0 = $t0
-syscall					# lancio print_int
-
 beq $t2, $zero, nord 	#0:nord
 addi $t2, $t2, -1
 beq $t2, $zero, est 	#1:est
@@ -83,44 +88,47 @@ addi $t2, $t2, -1
 beq $t2, $zero, sud 	#2:sud
 addi $t2, $t2, -1
 beq $t2, $zero, ovest 	#3:ovest
-j ExitSwitch;
+j ExitSwitch
 
 nord:
-bgt $s2, 20, ExitSwitch
-addi $s2, $s2, -20
+blt $s2, 20, ExitSwitch	#controlla se può andare a nord
+addi $s2, $s2, -10
+jal dot
+addi $s2, $s2, -10
+jal dot
 j ExitSwitch
 
 est:
-beq $s2, 17, ExitSwitch
+beq $s2, 17, ExitSwitch	#controlla se può andare a est
 beq $s2, 37, ExitSwitch
 beq $s2, 57, ExitSwitch
 beq $s2, 87, ExitSwitch
-addi $s2, $s2, 2
+addi $s2, $s2, -1
+jal dot
+addi $s2, $s2, -1
+jal dot
 j ExitSwitch
 
 sud:
-blt $s2, 60, ExitSwitch
-addi $s2, $s2, 20
+bgt $s2, 60, ExitSwitch	#controlla se può andare a sud
+addi $s2, $s2, -10
+jal dot
+addi $s2, $s2, -10
+jal dot
 j ExitSwitch
 
 ovest:
-beq $s2, 11, ExitSwitch
+beq $s2, 11, ExitSwitch	#controlla se può andare a ovest
 beq $s2, 31, ExitSwitch
 beq $s2, 51, ExitSwitch
 beq $s2, 81, ExitSwitch
-addi $s2, $s2, -2
+addi $s2, $s2, -1
+jal dot
+addi $s2, $s2, -1
+jal dot
+j ExitSwitch
+
 ExitSwitch:
-
-
-#POSIZIONO IL secondo punto
-li $t0, 65			#carico il carattere A di partenza in $t0
-sb $t0, ($s2)		#salva il char nel buffer(?)
-
-
-
-
-
-
 
 
 
@@ -193,15 +201,27 @@ add $s0, $zero, $v0		# memorizzo il seed iniziale in $s0
 jr $ra
 
 
+
 rand:	#restituisce in $t2 un valore pseudorandom [0..3]
 srl $s1, $s0, 2			#shift a destra di 2
 xor $s0, $s0, $s1		#xor tra seed e shiftato
 sll $s1, $s0, 6			#shift a sinistra di 6
 xor $s0, $s0, $s1		#xor tra seed e shiftato
-
 #per fare il modulo basta dividere per 4 e prendere il resto della divisione!
 div $t2, $s0, 4
 mfhi $t2
 abs $t2 $t2  #l'abs potrebbe essere semplice usando una xor?
-
 jr $ra
+
+
+
+
+
+
+
+dot:
+li $t0, 46			#carico il carattere . in $t0
+sb $t0, ($s2)		#salva il char
+jr $ra
+
+
