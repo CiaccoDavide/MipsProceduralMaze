@@ -13,9 +13,9 @@
 
 
 .data
-labirinto: .byte 	35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,0
 
-default: .byte 	35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,35,32,35,32,35,32,35,32,35,10,35,35,35,35,35,35,35,35,35,10,0
+labirinto: .byte 	35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,0
+default: .byte 	35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,35,35,35,35,35,35,35,35,35,10,0
 
 saluto: .asciiz "\nProgramma terminato!\nCreato da Ciacco Davide 794163"
 string1: .asciiz "\nInserire il seed: "
@@ -46,7 +46,7 @@ addi $t2, $t2, 11	#11+((2*x)+(20*y))
 #POSIZIONO IL PUNTO DI PARTENZA
 li $t0, 65			#carico il carattere A di partenza in $t0
 add $s4, $s4, $t2	#sposto il puntatore sulla casella
-sb $t0, ($s4)		#salva il char nel buffer(?)
+sb $t0, ($s4)		#salva il carattere A nel labirinto
 
 
 
@@ -161,15 +161,15 @@ jr $ra
 
 
 
-rand:	#restituisce in $t2 un valore pseudorandom [0..3]
+rand:	#restituisce in $t0 un valore pseudorandom [0..3]
 srl $s1, $s0, 3			#shift a destra di 2
 xor $s0, $s0, $s1		#xor tra seed e shiftato
 sll $s1, $s0, 5			#shift a sinistra di 6
 xor $s0, $s0, $s1		#xor tra seed e shiftato
 #per fare il modulo basta dividere per 4 e prendere il resto della divisione!
-div $t2, $s0, 4
-mfhi $t2
-abs $t2 $t2  #l'abs potrebbe essere semplice usando una xor?
+div $t0, $s0, 4
+mfhi $t0
+abs $t0 $t0  #l'abs potrebbe essere semplice usando una xor?
 jr $ra
 
 
@@ -199,29 +199,31 @@ syscall					# lancio print_string
 ricalcolaDirezione:
 jal rand 			#GENERA la direzione
 
-beq $t2, $s7, ricalcolaDirezione
+beq $t0, $s7, ricalcolaDirezione
 
-add $s7, $zero, $t2 #salvo (TEMP: da salvare nella stack per poter tornare indietro!)
+add $s7, $zero, $t0 #salvo (TEMP: da salvare nella stack per poter tornare indietro!)
 addi $s7, $s7, 2	#calcolo l'inverso della direzione 
 div $s7, $s7, 4
 mfhi $s7
 
-#$t2 contiene la direzione
+#$t0 contiene la direzione
 #$s4 contiene il pointer
 #$s2 contiene l'offset iniziale (pointer all'inizio della stringa labirinto)
-#$t5 contiene l'offset temporaneo per i controlli
-beq $t2, $zero, nord 	#0:nord
-addi $t2, $t2, -1
-beq $t2, $zero, est 	#1:est
-addi $t2, $t2, -1
-beq $t2, $zero, sud 	#2:sud
-addi $t2, $t2, -1
-beq $t2, $zero, ovest 	#3:ovest
-j ExitSwitch	#ATTENZIONE: qui abbiamo portato $t2 a 0, quindi non possiamo più ricavarne la dir di prov per il passo successivo!
+#$t1 e $t2 utilizzati per i controlli di spostamento
+#$t3,$t4,$t5,$t6 utilizzati per controllare di aver provato tutte le direzioni
+
+beq $t0, $zero, nord 	#0:nord
+addi $t0, $t0, -1
+beq $t0, $zero, est 	#1:est
+addi $t0, $t0, -1
+beq $t0, $zero, sud 	#2:sud
+addi $t0, $t0, -1
+beq $t0, $zero, ovest 	#3:ovest
+j ExitSwitch	#ATTENZIONE: qui abbiamo portato $t0 a 0, quindi non possiamo più ricavarne la dir di prov per il passo successivo!
 
 nord:
-addi $t5, $s2, 20
-blt $s4, $t5, ricalcolaDirezione	#controlla se può andare a nord
+addi $t1, $s2, 20
+blt $s4, $t1, ricalcolaDirezione	#controlla se può andare a nord
 addi $s4, $s4, -10
 jal dot
 addi $s4, $s4, -10
@@ -229,14 +231,14 @@ jal dot
 j ExitSwitch
 
 est:
-addi $t5, $s2, 17
-beq $s4, $t5, ricalcolaDirezione	#controlla se può andare a est
-addi $t5, $s2, 37
-beq $s4, $t5, ricalcolaDirezione
-addi $t5, $s2, 57
-beq $s4, $t5, ricalcolaDirezione
-addi $t5, $s2, 77
-beq $s4, $t5, ricalcolaDirezione
+addi $t1, $s2, 17
+beq $s4, $t1, ricalcolaDirezione	#controlla se può andare a est
+addi $t1, $s2, 37
+beq $s4, $t1, ricalcolaDirezione
+addi $t1, $s2, 57
+beq $s4, $t1, ricalcolaDirezione
+addi $t1, $s2, 77
+beq $s4, $t1, ricalcolaDirezione
 addi $s4, $s4, 1
 jal dot
 addi $s4, $s4, 1
@@ -244,8 +246,8 @@ jal dot
 j ExitSwitch
 
 sud:
-addi $t5, $s2, 60
-bgt $s4, $t5, ricalcolaDirezione	#controlla se può andare a sud
+addi $t1, $s2, 60
+bgt $s4, $t1, ricalcolaDirezione	#controlla se può andare a sud
 addi $s4, $s4, 10
 jal dot
 addi $s4, $s4, 10
@@ -253,14 +255,20 @@ jal dot
 j ExitSwitch
 
 ovest:
-addi $t5, $s2, 11
-beq $s4, $t5, ricalcolaDirezione	#controlla se può andare a ovest
-addi $t5, $s2, 31
-beq $s4, $t5, ricalcolaDirezione
-addi $t5, $s2, 51
-beq $s4, $t5, ricalcolaDirezione
-addi $t5, $s2, 71
-beq $s4, $t5, ricalcolaDirezione
+addi $t1, $s2, 11
+beq $s4, $t1, ricalcolaDirezione	#controlla se può andare a ovest
+addi $t1, $s2, 31
+beq $s4, $t1, ricalcolaDirezione
+addi $t1, $s2, 51
+beq $s4, $t1, ricalcolaDirezione
+addi $t1, $s2, 71
+beq $s4, $t1, ricalcolaDirezione
+#controlla se la destinazione è già stata esplorata
+addi $t1, $s4, -2
+lb $t1, ($t1)
+addi $t2, $zero, 35
+beq $t1, $t2, ricalcolaDirezione
+
 addi $s4, $s4, -1
 jal dot
 addi $s4, $s4, -1
