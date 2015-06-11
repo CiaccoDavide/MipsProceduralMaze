@@ -52,41 +52,13 @@ sb $t0, ($s4)		#salva il carattere A nel labirinto
 
 li $s7, 4 #carico subito la direzione di provenienza nulla
 
+#TEMP
+addi $t3, $zero, 1	#direzione provata? nord [1:no,0:si]
+addi $t4, $zero, 1	#direzione provata? est
+addi $t5, $zero, 1	#direzione provata? sud
+addi $t6, $zero, 1	#direzione provata? ovest
+#/TEMP
 jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-jal passo
-
-
-
-
-
-
-
 
 
 
@@ -190,13 +162,25 @@ passo:
 addi $sp, $sp, -4
 sw $ra, 0($sp)
 
+addi $t3, $zero, 1	#direzione provata? nord [1:no,0:si]
+addi $t4, $zero, 1	#direzione provata? est
+addi $t5, $zero, 1	#direzione provata? sud
+addi $t6, $zero, 1	#direzione provata? ovest
+
 
 #PROVVISORIO stampa il labirinto
 li $v0, 4				# selezione di print_string
 la $a0, labirinto		# $a0 = indirizzo di string2
 syscall					# lancio print_string
 
+
 ricalcolaDirezione:
+add $t0, $zero, $t3
+add $t0, $t0, $t4
+add $t0, $t0, $t5
+add $t0, $t0, $t6
+addi $t0, $t0, -1	#perchè la direzione di provenienza non la conta quindi sono tutti a zero tranne uno
+beq $t0, $zero, ExitSwitch	#se sono tutti a 0 quindi ogni direzione è stata esplorata allora esci
 jal rand 			#GENERA la direzione
 
 beq $t0, $s7, ricalcolaDirezione
@@ -222,8 +206,15 @@ beq $t0, $zero, ovest 	#3:ovest
 j ExitSwitch	#ATTENZIONE: qui abbiamo portato $t0 a 0, quindi non possiamo più ricavarne la dir di prov per il passo successivo!
 
 nord:
+addi $t3, $zero, 0 #TEMP: salva la direzione considerata
 addi $t1, $s2, 20
 blt $s4, $t1, ricalcolaDirezione	#controlla se può andare a nord
+#controlla se la destinazione è già stata esplorata
+addi $t1, $s4, -20
+lb $t1, ($t1)
+addi $t2, $zero, 35					#carattere 35 = #
+bne $t1, $t2, ricalcolaDirezione	#se è # allora non è ancora esplorato
+
 addi $s4, $s4, -10
 jal dot
 addi $s4, $s4, -10
@@ -231,6 +222,7 @@ jal dot
 j ExitSwitch
 
 est:
+addi $t4, $zero, 0 #TEMP: salva la direzione considerata
 addi $t1, $s2, 17
 beq $s4, $t1, ricalcolaDirezione	#controlla se può andare a est
 addi $t1, $s2, 37
@@ -239,6 +231,12 @@ addi $t1, $s2, 57
 beq $s4, $t1, ricalcolaDirezione
 addi $t1, $s2, 77
 beq $s4, $t1, ricalcolaDirezione
+#controlla se la destinazione è già stata esplorata
+addi $t1, $s4, 2
+lb $t1, ($t1)
+addi $t2, $zero, 35					#carattere 35 = #
+bne $t1, $t2, ricalcolaDirezione	#se è # allora non è ancora esplorato
+
 addi $s4, $s4, 1
 jal dot
 addi $s4, $s4, 1
@@ -246,8 +244,15 @@ jal dot
 j ExitSwitch
 
 sud:
+addi $t5, $zero, 0 #TEMP: salva la direzione considerata
 addi $t1, $s2, 60
 bgt $s4, $t1, ricalcolaDirezione	#controlla se può andare a sud
+#controlla se la destinazione è già stata esplorata
+addi $t1, $s4, 20
+lb $t1, ($t1)
+addi $t2, $zero, 35					#carattere 35 = #
+bne $t1, $t2, ricalcolaDirezione	#se è # allora non è ancora esplorato
+
 addi $s4, $s4, 10
 jal dot
 addi $s4, $s4, 10
@@ -255,6 +260,7 @@ jal dot
 j ExitSwitch
 
 ovest:
+addi $t6, $zero, 0 #TEMP: salva la direzione considerata
 addi $t1, $s2, 11
 beq $s4, $t1, ricalcolaDirezione	#controlla se può andare a ovest
 addi $t1, $s2, 31
@@ -266,8 +272,8 @@ beq $s4, $t1, ricalcolaDirezione
 #controlla se la destinazione è già stata esplorata
 addi $t1, $s4, -2
 lb $t1, ($t1)
-addi $t2, $zero, 35
-beq $t1, $t2, ricalcolaDirezione
+addi $t2, $zero, 35					#carattere 35 = #
+bne $t1, $t2, ricalcolaDirezione	#se è # allora non è ancora esplorato
 
 addi $s4, $s4, -1
 jal dot
