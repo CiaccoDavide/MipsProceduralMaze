@@ -9,8 +9,6 @@
 .data
 
 spbackup: .word 0
-pushcounter: .byte 0
-popcounter: .byte 0
 xy: .space 2
 labirinto: .space 1157 #alloco lo spazio massimo (labirinto 16x16)
 
@@ -253,10 +251,6 @@ esplora:
 	sb $s4, 0($sp)
 
 	addi $s3, $s3, 1 #aggiungi 1 alle zone esplorate (solo quando si muove in avanti)
-	la $t1, pushcounter
-	lb $t0, ($t1)
-	addi $t0, $t0, 1
-	sb $t0, ($t1)
 
 	#setta la provenienza (invertita perche' dovra' essere usata dalla prossima posizione)
 	add $t0, $zero, $a2
@@ -354,11 +348,6 @@ passoIndietro:
 	lb $s4, 0($sp)
 	addi $sp, $sp, 4
 
-
-	la $t1, popcounter
-	lb $t0, ($t1)
-	addi $t0, $t0, 1
-	sb $t0, ($t1)
 
 	j esplora
 
