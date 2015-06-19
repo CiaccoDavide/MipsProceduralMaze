@@ -12,10 +12,11 @@ spbackup: .word 0
 xy: .space 2
 labirinto: .space 1157 #alloco lo spazio massimo (labirinto 16x16)
 
+benvenuto: .asciiz "\nGeneratore procedurale di labirinti in MIPS"
 saluto: .asciiz "\nProgramma terminato!\nCreato da Ciacco Davide 794163"
-stringX: .asciiz "\nInserire la larghezza del labirinto [4..16]: "
-stringY: .asciiz "\nInserire l'altezza del labirinto [4..16]: "
-stringS: .asciiz "\nInserire il seed: "
+stringX: .asciiz " Inserire la larghezza del labirinto [4..16]: "
+stringY: .asciiz " Inserire l'altezza del labirinto [4..16]: "
+stringS: .asciiz " Inserire il seed: "
 
 .text
 main:
@@ -68,9 +69,13 @@ main:
 	addi $s6, $zero, 0	#direzione provata? sud
 	addi $s7, $zero, 0	#direzione provata? ovest
 
-	#j termina
 	j esplora #funz ricorsiva
 
+
+
+	#jal init
+	#jal genera <- il reset dello stackpointer dovrà essere fatto qui? allora anche lo store dello stackpointer
+	#j termina
 
 
 
