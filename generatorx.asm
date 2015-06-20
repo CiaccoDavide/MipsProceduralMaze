@@ -1,10 +1,14 @@
+# VARIABILI GLOBALI (persistenti e utilizzabili per un singolo scopo in qualsiasi punto del codice):
 #	$s0 seed
 #	$s1 string pointer dinamico
-#	$s3 string pointer statico (per fare calcoli su precisi offset della stringa)
+#	$s2 string pointer statico
+#	$s3 contiene il contatore delle zone esplorate
 
-#	$s5 contiene il contatore delle zone esplorate
-#	$s6 contiene il contatore delle posizioni da 2 a 0 {si dovrà saltare la direzione di provenienza}
-#	$s7 contiene la direzione di provenienza
+# STATO DIREZIONI[0:inesplorata, 1:esplorata, 2:provenienza]:
+#	$s4 nord
+#	$s5 est
+#	$s6 sud
+#	$s7 ovest
 
 .data
 
@@ -145,13 +149,6 @@ passoAvanti:
 	j passoIndietro				#se tutte le direzioni sono state provate allora torna indietro
 	continua:
 
-	#$v0 contiene la direzione
-	#$s1 contiene il pointer
-	#$s2 contiene l'offset iniziale (pointer all'inizio della stringa labirinto)
-	#$t1 e $t2 utilizzati per i controlli di spostamento
-	#$s4,$s5,$s6,$s7 utilizzati per controllare di aver provato tutte le direzioni
-
-	#ricalcolaDirezione:
 	addi $a0, $zero, 4		#set dell'argomento da passare a rand
 	jal rand 				#GENERA la direzione e la controlla
 	add $a2, $zero, $v0		#salva la direzione di movimento per passarla al passo avanti
