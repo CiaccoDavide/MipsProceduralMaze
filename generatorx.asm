@@ -148,8 +148,8 @@ init:
 passoAvanti:	# passoAvanti(provenienza $a1)
 
 	# controlla se tutte le celle sono state esplorate ($s3==16)
-	mul $t7, $t8, $t9	# numero di celle esplorabili (lo posso calcolare ogni volta visto che e' storato in dei registri temporanei, ma per ora e' uno spreco di risorse anche se non conforme alle convenzioni MIPS)
-	beq $s3, $t7, termina # il termina stampera' direttamente la B
+	mul $t7, $t8, $t9			# numero di celle esplorabili (lo posso calcolare ogni volta visto che e' storato in dei registri temporanei, ma per ora e' uno spreco di risorse anche se non conforme alle convenzioni MIPS)
+	beq $s3, $t7, termina 		# il termina stampera' direttamente la B
 
 	ricalcolaDirezione:
 	# controlla se tutte le direzioni sono state provate
@@ -178,13 +178,12 @@ passoAvanti:	# passoAvanti(provenienza $a1)
 	# segna che ha considerato questa direzione
 	addi $s4, $zero, 1
 	# controlla se può andare a nord
-	mul $t7, $t8, 2		#  2*larghezza
-	addi $t7, $t7, 2	# (2*larghezza + 2)
-	mul $t7, $t7, 3		# (2*larghezza + 2)*2
+	mul $t7, $t8, 2			#  2*larghezza
+	addi $t7, $t7, 2		# (2*larghezza + 2)
+	mul $t7, $t7, 3			# (2*larghezza + 2)*2
 	add $t1, $s2, $t7
 	blt $s1, $t1, ricalcolaDirezione
 	# controlla se la destinazione è già stata esplorata anche da qualche altro punto
-
 	mul $t7, $t8, 4
 	addi $t7, $t7, 4
 
@@ -192,7 +191,7 @@ passoAvanti:	# passoAvanti(provenienza $a1)
 	lb $t1, ($t1)
 	bne $t1, 35, ricalcolaDirezione	# se è # allora non è ancora esplorato (carattere 35 = #)
 
-	li $a0, 46			# carico il carattere '.' in $a0 per passarlo alla funzione storeChar
+	li $a0, 46				# carico il carattere '.' in $a0 per passarlo alla funzione storeChar
 	div $t7, $t7, 2
 	sub $s1, $s1, $t7
 	jal storeChar
@@ -206,19 +205,18 @@ passoAvanti:	# passoAvanti(provenienza $a1)
 	# segna che ha considerato questa direzione
 	addi $s5, $zero, 1
 	# controlla se può andare a est
-
-	mul $t7, $t8, 2
-	addi $t7, $t7, 3
-	sub $t6, $s1, $s2 	# $s1-$s2
-	sub $t7, $t6, $t7 	# ($s1-$s2)-(2*larghezza+3)
-	addi $t6, $t8, -1 	# (x-1)
-	mul $t6, $t6, 2  	# 2*(x-1)
-	add $t7, $t7, $t6 	# 2*(x-1)+($s1-$s2)-(2*larghezza+3)
+	mul $t7, $t8, 2 		#            2*larghezza
+	addi $t7, $t7, 3 		#           (2*larghezza+3)
+	sub $t6, $s1, $s2 		#  $s1-$s2
+	sub $t7, $t6, $t7 		# ($s1-$s2)-(2*larghezza+3)
+	addi $t6, $t8, -1 		# (x-1)
+	mul $t6, $t6, 2  		# 2*(x-1)
+	add $t7, $t7, $t6 		# 2*(x-1)+($s1-$s2)-(2*larghezza+3)
 	beq $t7, $zero, ricalcolaDirezione
 
-	mul $t6, $t8, 2		#  2*larghezza
-	addi $t6, $t6, 2	# (2*larghezza + 2)
-	mul $t6, $t6, 2		# (2*larghezza + 2)*2
+	mul $t6, $t8, 2			#  2*larghezza
+	addi $t6, $t6, 2		# (2*larghezza + 2)
+	mul $t6, $t6, 2			# (2*larghezza + 2)*2
 	div $t7, $t7, $t6
 	mfhi $t7
 	beq $t7, $zero, ricalcolaDirezione
@@ -228,7 +226,7 @@ passoAvanti:	# passoAvanti(provenienza $a1)
 	lb $t1, ($t1)
 	bne $t1, 35, ricalcolaDirezione	# se è # allora non è ancora esplorato (carattere 35 = #)
 
-	li $a0, 46			# carico il carattere '.' in $a0 per passarlo alla funzione storeChar
+	li $a0, 46				# carico il carattere '.' in $a0 per passarlo alla funzione storeChar
 	addi $s1, $s1, 1
 	jal storeChar
 	addi $s1, $s1, 1
@@ -241,14 +239,13 @@ passoAvanti:	# passoAvanti(provenienza $a1)
 	# segna che ha considerato questa direzione
 	addi $s6, $zero, 1
 	# controlla se può andare a sud
-
 	mul $t7, $t8, 2
 	addi $t7, $t7, 2
 	mul $t6, $t9, 2
 	addi $t6, $t6, 2
-	mul $t7, $t7, $t6	# lunghezza stringa
-	mul $t6, $t8, 2		#  larghezza*2
-	addi $t6, $t6, 2	# (larghezza*2)+2
+	mul $t7, $t7, $t6		# lunghezza stringa
+	mul $t6, $t8, 2			#  larghezza*2
+	addi $t6, $t6, 2		# (larghezza*2)+2
 	mul $t6, $t6, 3
 	sub $t7, $t7, $t6
 
@@ -264,7 +261,7 @@ passoAvanti:	# passoAvanti(provenienza $a1)
 	lb $t1, ($t1)
 	bne $t1, 35, ricalcolaDirezione	# se è # allora non è ancora esplorato (carattere 35 = #)
 
-	li $a0, 46			# carico il carattere '.' in $a0 per passarlo alla funzione storeChar
+	li $a0, 46				# carico il carattere '.' in $a0 per passarlo alla funzione storeChar
 	div $t7, $t7, 2
 	add $s1, $s1, $t7
 	jal storeChar
@@ -278,15 +275,15 @@ passoAvanti:	# passoAvanti(provenienza $a1)
 	# segna che ha considerato questa direzione
 	addi $s7, $zero, 1
 	# controlla se può andare a ovest
-	mul $t7, $t8, 2
-	addi $t7, $t7, 3
-	sub $t6, $s1, $s2 	# $s1-$s2
-	sub $t7, $t6, $t7 	# ($s1-$s2)-(2*larghezza+3)
+	mul $t7, $t8, 2 		#            2*larghezza
+	addi $t7, $t7, 3 		#           (2*larghezza+3)
+	sub $t6, $s1, $s2 		#  $s1-$s2
+	sub $t7, $t6, $t7 		# ($s1-$s2)-(2*larghezza+3)
 	beq $t7, $zero, ricalcolaDirezione
 
-	mul $t6, $t8, 2		#  2*larghezza
-	addi $t6, $t6, 2	# (2*larghezza + 2)
-	mul $t6, $t6, 2		# (2*larghezza + 2)*2
+	mul $t6, $t8, 2			#  2*larghezza
+	addi $t6, $t6, 2		# (2*larghezza + 2)
+	mul $t6, $t6, 2			# (2*larghezza + 2)*2
 	div $t7, $t7, $t6
 	mfhi $t7
 	beq $t7, $zero, ricalcolaDirezione
@@ -296,7 +293,7 @@ passoAvanti:	# passoAvanti(provenienza $a1)
 	lb $t1, ($t1)
 	bne $t1, 35, ricalcolaDirezione	#se è # allora non è ancora esplorato (carattere 35 = #)
 
-	li $a0, 46			# carico il carattere '.' in $a0 per passarlo alla funzione storeChar
+	li $a0, 46				# carico il carattere '.' in $a0 per passarlo alla funzione storeChar
 	addi $s1, $s1, -1
 	jal storeChar
 	addi $s1, $s1, -1
