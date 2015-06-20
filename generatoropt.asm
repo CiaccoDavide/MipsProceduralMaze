@@ -21,10 +21,7 @@ stringS: .asciiz " Inserire il seed: "
 .text
 main:
 
-#################################
-# PROCEDURA DI INIZIALIZZAZIONE #
-#################################
-init:
+
 	#salva sp
 	la $t0, spbackup
 	sw $sp, ($t0)
@@ -36,8 +33,8 @@ init:
 	li $v0, 5				# Selezione read_int (codice = 5)
 	syscall
 
-	blt $v0, 2, init 		#x>=4
-	bgt $v0, 16, init 		#x<=16
+	blt $v0, 2, reset 		#x>=4
+	bgt $v0, 16, reset 		#x<=16
 
 	la $t1, xy
 	sb $v0, ($t1)
@@ -49,8 +46,8 @@ init:
 	li $v0, 5				# Selezione read_int (codice = 5)
 	syscall
 
-	blt $v0, 2, init 		#x>=4
-	bgt $v0, 16, init 		#x<=16
+	blt $v0, 2, reset 		#x>=4
+	bgt $v0, 16, reset 		#x<=16
 
 	sb $v0, 1($t1)
 
@@ -85,7 +82,8 @@ init:
 
 	addi $t0, $zero, 0
 	sb $t0, ($s1)
-#fine vecchio reset
+	#jr $ra
+
 
 	la $s2, labirinto 	#non serve caricare subito la default finchè non si vuole fare il reset
 						#$s2 invece mi serve per calcolare l'offset sulla stringa $s1 > $s2+11
@@ -131,18 +129,7 @@ init:
 	addi $s6, $zero, 0	#direzione provata? sud
 	addi $s7, $zero, 0	#direzione provata? ovest
 
-	j passoAvanti #passa alla funzione ricorsiva
-
-	#jal init
-	#jal genera <- il reset dello stackpointer dovrà essere fatto qui? allora anche lo store dello stackpointer
-	#j termina
-
-
-
-############################
-# PROCEDURA DI GENERAZIONE #
-############################
-passoAvanti:
+esplora:
 
 	ricalcolaDirezione:
 	#VerificaDirezione:
@@ -353,7 +340,7 @@ passoAvanti:
 	addi $s7, $zero, 0
 	notOvest:
 
-	j passoAvanti
+	j esplora
 
 
 
@@ -417,15 +404,42 @@ passoIndietro:
 	addi $sp, $sp, 4
 
 
-	j passoAvanti
+	j esplora
+
+
+
+termina:	#da migliorare con menu per la scelta: 0:termina 1:reset e restart!
+
+	li $t3, 66			#carico il carattere 'B' in $t0
+	sb $t3, ($s1)		#salva il char
+
+	li $v0, 4				# selezione di print_string
+	la $a0, labirinto		# $a0 = indirizzo di string2
+	syscall					# lancio print_string
+
+	li $v0, 4		#stampo l'autore del programma
+	la $a0, saluto
+	syscall
+
+
+
+
+	resetStack:
+	la $t0, spbackup
+	lw $t0, ($t0)
+	add $sp, $zero, $t0
+
+
+
+	j reset	#ORA CONTINUA ALL'INFINITO CHIEDENDO SEMPRE NUOVI SEEDS
+
+	li $v0, 10     	#termino il programma tramite syscall apposita
+	syscall
 
 
 
 
 
-###################
-# ALTRE PROCEDURE #
-###################
 seed:
 	li $v0, 4				# selezione di print_string (codice = 4)
 	la $a0, stringS			# $a0 = indirizzo di string1
@@ -455,37 +469,3 @@ rand:	#restituisce in $v0 un valore pseudorandom [0..$a0]
 storeChar:				# void storeChar($a0) accetta un byte per salvare il corrispondente ascii nella stringa
 	sb $a0, ($s1)		#salva il char contenuto in $a0 #dovrei passargli anche $s1? o è una "variabile globale"?
 	jr $ra
-
-
-
-
-#############################
-# PROCEDURA DI TERMINAZIONE #
-#############################
-termina:	#da migliorare con menu per la scelta: 0:termina 1:reset e restart!
-
-	li $t3, 66			#carico il carattere 'B' in $t0
-	sb $t3, ($s1)		#salva il char
-
-	li $v0, 4				# selezione di print_string
-	la $a0, labirinto		# $a0 = indirizzo di string2
-	syscall					# lancio print_string
-
-	li $v0, 4		#stampo l'autore del programma
-	la $a0, saluto
-	syscall
-
-
-
-
-	resetStack:
-	la $t0, spbackup
-	lw $t0, ($t0)
-	add $sp, $zero, $t0
-
-
-
-	j init	#ORA CONTINUA ALL'INFINITO CHIEDENDO SEMPRE NUOVI SEEDS
-
-	li $v0, 10     	#termino il programma tramite syscall apposita
-	syscall
