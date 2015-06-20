@@ -121,7 +121,7 @@ init:
 	li $a0, 65			#carico il carattere A di partenza in $t0
 	jal storeChar		#salva il carattere A nel labirinto
 
-	addi $a2, $zero, 4 	#direzione di provenienza nulla
+	addi $a1, $zero, 4 	#direzione di provenienza nulla
 	addi $s3, $zero, 1	#setta 'celle esplorate' a uno (mi trovo già sulla prima cella)
 	#imposto le direzioni tutte a 'inesplorate'
 	addi $s4, $zero, 0	#nord
@@ -134,7 +134,7 @@ init:
 ############################
 # PROCEDURA DI GENERAZIONE #
 ############################
-passoAvanti:
+passoAvanti:	#passoAvanti(provenienza $a1)
 
 	#controlla se tutte le celle sono state esplorate ($s3==16)
 	mul $t7, $t8, $t9	#numero di celle esplorabili (lo posso calcolare ogni volta visto che e' storato in dei registri temporanei, ma per ora e' uno spreco di risorse anche se non conforme alle convenzioni MIPS)
@@ -152,7 +152,7 @@ passoAvanti:
 	#GENERO LA PROSSIMA DIREZIONE DA PROVARE
 	addi $a0, $zero, 4		#set dell'argomento da passare a rand
 	jal rand 				#GENERA la direzione e la controlla
-	add $a2, $zero, $v0		#salva la direzione di movimento per passarla al passo avanti
+	add $a1, $zero, $v0		#salva la direzione di movimento per passarla al passo avanti
 	beq $v0, $zero, nord 	#0:nord
 	addi $v0, $v0, -1
 	beq $v0, $zero, est 	#1:est
@@ -307,7 +307,7 @@ passoAvanti:
 	addi $s3, $s3, 1 #aggiungi 1 alle celle esplorate (solo quando si muove in avanti)
 
 	#setta la provenienza (invertita perche' dovra' essere usata dalla prossima posizione)
-	add $t0, $zero, $a2
+	add $t0, $zero, $a1
 	bne $t0, $zero, notNord
 	addi $s4, $zero, 0
 	addi $s5, $zero, 0
