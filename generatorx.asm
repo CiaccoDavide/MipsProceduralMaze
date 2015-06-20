@@ -102,19 +102,18 @@ init:
 	add $t4, $zero, $v0 #salva la y in $t4
 
 	#DETERMINO L'OFFSET SULLA STRINGA DEL LABIRINTO e lo salvo in $t2
-	mul $t3, $t3, 2		#(2*x)
-	mul $t5, $t8, 4		# 4*larghezza
-	addi $t5, $t5, 4	#(2*larghezza + 2)*2
+	mul $t3, $t3, 2		# (2*x)
+	mul $t5, $t8, 4		#          4*larghezza
+	addi $t5, $t5, 4	#          4*larghezza+4
+	mul $t4, $t4, $t5	#         (4*larghezza+4)*y
 
-	mul $t4, $t4, $t5	#((2*larghezza + 2)*2)*y
-
-	add $t2, $t3, $t4	#(2*x)+((2*larghezza+2)*2)*y
-	add $t2, $t2, $t8	#(2*x)+((2*larghezza+2)*2)*y+larghezza
-	add $t2, $t2, $t8	#(2*x)+((2*larghezza+2)*2)*y+2*larghezza
-	addi $t2, $t2, 3	#(2*x)+((2*larghezza+2)*2)*y+(2*larghezza+3)
+	add $t2, $t3, $t4	# (2*x) + (4*larghezza+4)*y
+	add $t2, $t2, $t8	# (2*x) + (4*larghezza+4)*y +   larghezza
+	add $t2, $t2, $t8	# (2*x) + (4*larghezza+4)*y + 2*larghezza
+	addi $t2, $t2, 3	# (2*x) + (4*larghezza+4)*y +(2*larghezza+3)
 
 	#POSIZIONO IL PUNTO DI PARTENZA
-	add $s1, $s1, $t2	#sposto il puntatore dinamico sulla casella di partenza
+	add $s1, $s1, $t2	#sposto il puntatore dinamico sulla cella di partenza
 	li $a0, 65			#carico il carattere A di partenza in $t0
 	jal storeChar		#salva il carattere A nel labirinto
 
@@ -126,7 +125,7 @@ init:
 	addi $s6, $zero, 0	#direzione provata? sud
 	addi $s7, $zero, 0	#direzione provata? ovest
 
-	j passoAvanti #passa alla funzione ricorsiva (probabilmente inutile visto che è posizionata subito dopo)
+	j passoAvanti #passa alla funzione ricorsiva (tenta di fare il primo passo avanti)
 
 ############################
 # PROCEDURA DI GENERAZIONE #
@@ -249,7 +248,7 @@ passoAvanti:
 	bgt $s1, $t1, ricalcolaDirezione
 	#controlla se la destinazione è già stata esplorata
 
-	#prima ricalcola la casella sotto
+	#prima ricalcola la cella sotto
 	mul $t7, $t8, 4
 	addi $t7, $t7, 4
 
