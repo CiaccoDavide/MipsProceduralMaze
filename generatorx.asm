@@ -71,43 +71,40 @@ init:
 
 			addi $s1, $s1, 1		#sposto il puntatore dinamico sul prossimo byte/carattere
 			addi $t2, $t2, -1		#larghezza--
-
 			bne $t2, $zero, forx	#if(larghezza==0)return;
 
-		addi $a0, $zero, 10	#carico il carattere '\n' in $a0 per passarlo alla funzione storeChar
+		addi $a0, $zero, 10		#carico il carattere '\n' in $a0 per passarlo alla funzione storeChar
 		jal storeChar
 
-		addi $s1, $s1, 1
-		addi $t3, $t3, -1
-		bne $t3, $zero, fory
+		addi $s1, $s1, 1		#sposto il puntatore dinamico sul prossimo byte/carattere
+		addi $t3, $t3, -1		#altezza--
+		bne $t3, $zero, fory	#if(altezza==0)return;
 
 	addi $a0, $zero, 0	#carico il carattere '\0' in $a0 per passarlo alla funzione storeChar
 	jal storeChar
 	#fine della generazione della stringa
 
-	la $s2, labirinto 	#non serve caricare subito la default finchè non si vuole fare il reset
-						#$s2 invece mi serve per calcolare l'offset sulla stringa $s1 > $s2+11
-	la $s1, labirinto
+	la $s2, labirinto 	#$s2 (puntatore statico) mi serve per calcolare l'offset sulla stringa $s1 > $s2+11
+	la $s1, labirinto	#carica l'indirizzo di labirinto in $s1 (puntatore dinamico)
 
-	jal seed
+	jal seed			#si chiede all'utente di inserire un seed per la generazione di numeri pseudocasuali
 
-	# x,y in $t8,$t9
+	#GENERO LE COORDINATE INIZIALI
 	la $t1, wh
-	lb $t8, 0($t1) #larghezza
-	add $a0, $zero, $t8
-	jal rand 			#GENERA la X
+	lb $t8, 0($t1) 		#salvo la larghezza in $t8
+	add $a0, $zero, $t8	#passo la larghezza alla procedura rand
+	jal rand 			#GENERA la X iniziale
 	add $t3, $zero, $v0 #salva la x in $t3
-	lb $t9, 1($t1) #altezza
-	add $a0, $zero, $t9
-	jal rand 			#GENERA la Y
+
+	lb $t9, 1($t1) 		#salvo l'altezza in $t9
+	add $a0, $zero, $t9	#passo l'altezza alla procedura rand
+	jal rand 			#GENERA la Y iniziale
 	add $t4, $zero, $v0 #salva la y in $t4
 
 	#DETERMINO L'OFFSET SULLA STRINGA DEL LABIRINTO e lo salvo in $t2
 	mul $t3, $t3, 2		#(2*x)
-
-	mul $t5, $t8, 2		# 2*larghezza
-	addi $t5, $t5, 2	#(2*larghezza + 2)
-	mul $t5, $t5, 2		#(2*larghezza + 2)*2
+	mul $t5, $t8, 4		# 4*larghezza
+	addi $t5, $t5, 4	#(2*larghezza + 2)*2
 
 	mul $t4, $t4, $t5	#((2*larghezza + 2)*2)*y
 
