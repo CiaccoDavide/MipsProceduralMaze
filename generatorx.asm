@@ -9,8 +9,8 @@
 .data
 
 spbackup: .word 0
-xy: .space 2
-labirinto: .space 1157 		#alloco lo spazio massimo (necessario per un labirinto 16x16)
+wh: .space 2				#alloco lo spazio di due byte per salvare le variabili larghezza (w) e altezza (h)
+labirinto: .space 1157 		#alloco lo spazio massimo (necessario per un labirinto 16x16) potevo usare sbrk per allocare dinamicamente la memoria
 
 benvenuto: .asciiz "\nGeneratore procedurale di labirinti in MIPS"
 saluto: .asciiz "\nProgramma terminato!\nCreato da Ciacco Davide 794163"
@@ -25,55 +25,54 @@ main:
 # PROCEDURA DI INIZIALIZZAZIONE #
 #################################
 init:
-	#salva sp
+	#salva $sp iniziale
 	la $t0, spbackup
 	sw $sp, ($t0)
 
-	#STORE X
+	#chiede all'utente di inserire la larghezza (in celle) del labirinto
 	li $v0, 4				# selezione di print_string (codice = 4)
 	la $a0, stringX			# $a0 = indirizzo di string1
 	syscall					# lancio print_string
 	li $v0, 5				# Selezione read_int (codice = 5)
 	syscall
 
-	blt $v0, 2, init 		#x>=4
-	bgt $v0, 16, init 		#x<=16
+	blt $v0, 2, init 		#w>=2
+	bgt $v0, 16, init 		#w<=16
 
-	la $t1, xy
-	sb $v0, ($t1)
+	la $t1, wh				#carica in $t1 l'indirizzo di wh
+	sb $v0, ($t1)			#salva la larghezza nella memoria
 
-	#STORE Y
+	#chiede all'utente di inserire l'altezza (in celle) del labirinto
 	li $v0, 4				# selezione di print_string (codice = 4)
 	la $a0, stringY			# $a0 = indirizzo di string1
 	syscall					# lancio print_string
 	li $v0, 5				# Selezione read_int (codice = 5)
 	syscall
 
-	blt $v0, 2, init 		#x>=4
-	bgt $v0, 16, init 		#x<=16
+	blt $v0, 2, init 		#h>=2
+	bgt $v0, 16, init 		#h<=16
 
-	sb $v0, 1($t1)
+	sb $v0, 1($t1)			#salva l'altezza nella memoria
 
+	#ottenute le dimensioni del labirinto da generare, si crea la stringa in cui verrà "scolpito" il labirinto
 	la $s1, labirinto 		#carica l'indirizzo di labirinto in $s1
-
-
 	#start doppio for x,y
-	lb $t3, 1($t1) 			#carico la y in t2
-	mul $t3, $t3, 2
-	addi $t3, $t3, 1
+	lb $t3, 1($t1) 			#carico l'altezza in t2
+	mul $t3, $t3, 2			#
+	addi $t3, $t3, 1		#calcolo il numero di righe necessario per disegnare il labirinto in altezza
 	fory:
 		lb $t2, ($t1)			#carico la x in t1
-		mul $t2, $t2, 2
-		addi $t2, $t2, 1
+		mul $t2, $t2, 2			#
+		addi $t2, $t2, 1		#calcolo il numero di colonne necessario per disegnare il labirinto in larghezza
 
 		forx:
-			addi $a0, $zero, 35	#carico il carattere '#' in $a0 per passarlo alla funzione storeChar
+			addi $a0, $zero, 35		#carico il carattere '#' in $a0 per passarlo alla funzione storeChar
 			jal storeChar
 
-			addi $s1, $s1, 1
-			addi $t2, $t2, -1
+			addi $s1, $s1, 1		#sposto il puntatore dinamico sul prossimo byte/carattere
+			addi $t2, $t2, -1		#larghezza--
 
-			bne $t2, $zero, forx
+			bne $t2, $zero, forx	#if(larghezza==0)return;
 
 		addi $a0, $zero, 10	#carico il carattere '\n' in $a0 per passarlo alla funzione storeChar
 		jal storeChar
@@ -84,7 +83,7 @@ init:
 
 	addi $a0, $zero, 0	#carico il carattere '\0' in $a0 per passarlo alla funzione storeChar
 	jal storeChar
-	#fine vecchio reset
+	#fine della generazione della stringa
 
 	la $s2, labirinto 	#non serve caricare subito la default finchè non si vuole fare il reset
 						#$s2 invece mi serve per calcolare l'offset sulla stringa $s1 > $s2+11
@@ -93,7 +92,7 @@ init:
 	jal seed
 
 	# x,y in $t8,$t9
-	la $t1, xy
+	la $t1, wh
 	lb $t8, 0($t1) #larghezza
 	add $a0, $zero, $t8
 	jal rand 			#GENERA la X
