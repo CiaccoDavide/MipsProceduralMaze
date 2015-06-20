@@ -2,7 +2,7 @@
 #	$s0 seed
 #	$s1 string pointer dinamico
 #	$s2 string pointer statico
-#	$s3 contiene il contatore delle zone esplorate
+#	$s3 contiene il contatore delle celle esplorate
 
 # STATO DIREZIONI[0:inesplorata, 1:esplorata, 2:provenienza]:
 #	$s4 nord
@@ -122,25 +122,25 @@ init:
 	jal storeChar		#salva il carattere A nel labirinto
 
 	addi $a2, $zero, 4 	#direzione di provenienza nulla
-	addi $s3, $zero, 1	#setta 'zone esplorate' a uno
-	#setta le direzioni provate tutte a 'no'
-	addi $s4, $zero, 0	#direzione provata? nord [1:no,0:si,2:provenienza]
-	addi $s5, $zero, 0	#direzione provata? est
-	addi $s6, $zero, 0	#direzione provata? sud
-	addi $s7, $zero, 0	#direzione provata? ovest
+	addi $s3, $zero, 1	#setta 'celle esplorate' a uno (mi trovo già sulla prima cella)
+	#imposto le direzioni tutte a 'inesplorate'
+	addi $s4, $zero, 0	#nord
+	addi $s5, $zero, 0	#est
+	addi $s6, $zero, 0	#sud
+	addi $s7, $zero, 0	#ovest
 
-	j passoAvanti #passa alla funzione ricorsiva (tenta di fare il primo passo avanti)
+	j passoAvanti 		#passa alla funzione ricorsiva (tenta di fare il primo passo avanti)
 
 ############################
 # PROCEDURA DI GENERAZIONE #
 ############################
 passoAvanti:
 
-	ricalcolaDirezione:
-	#VerificaDirezione:
-	#controlla se tutte le zone sono state esplorate ($s3==16)
-	mul $t7, $t8, $t9	#numero di zone esplorabili (lo posso calcolare ogni volta visto che e' storato in dei registri temporanei, ma per ora e' uno spreco di risorse anche se non conforme alle convenzioni MIPS)
+	#controlla se tutte le celle sono state esplorate ($s3==16)
+	mul $t7, $t8, $t9	#numero di celle esplorabili (lo posso calcolare ogni volta visto che e' storato in dei registri temporanei, ma per ora e' uno spreco di risorse anche se non conforme alle convenzioni MIPS)
 	beq $s3, $t7, termina #il termina stampera' direttamente la B
+
+	ricalcolaDirezione:
 	#controlla se tutte le direzioni sono state provate
 	beq $s4, $zero, continua
 	beq $s5, $zero, continua
@@ -149,6 +149,7 @@ passoAvanti:
 	j passoIndietro				#se tutte le direzioni sono state provate allora torna indietro
 	continua:
 
+	#GENERO LA PROSSIMA DIREZIONE DA PROVARE
 	addi $a0, $zero, 4		#set dell'argomento da passare a rand
 	jal rand 				#GENERA la direzione e la controlla
 	add $a2, $zero, $v0		#salva la direzione di movimento per passarla al passo avanti
@@ -159,7 +160,7 @@ passoAvanti:
 	beq $v0, $zero, sud 	#2:sud
 	addi $v0, $v0, -1
 	beq $v0, $zero, ovest 	#3:ovest
-	j ExitSwitch	#ATTENZIONE: qui abbiamo portato $t0 a 0, quindi non possiamo più ricavarne la dir di prov per il passo successivo!
+	j ExitSwitch	#jump inutile... ATTENZIONE: rand porta $t0 a 0, quindi non possiamo più ricavarne la dir di prov per il passo successivo!
 
 	nord:
 	#controlla se la destinazione è già stata provata
@@ -303,7 +304,7 @@ passoAvanti:
 	sb $s5, 1($sp)
 	sb $s4, 0($sp)
 
-	addi $s3, $s3, 1 #aggiungi 1 alle zone esplorate (solo quando si muove in avanti)
+	addi $s3, $s3, 1 #aggiungi 1 alle celle esplorate (solo quando si muove in avanti)
 
 	#setta la provenienza (invertita perche' dovra' essere usata dalla prossima posizione)
 	add $t0, $zero, $a2

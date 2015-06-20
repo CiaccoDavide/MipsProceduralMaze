@@ -4,7 +4,7 @@
 #	$s3 string pointer (reset default)
 #	$s1 string pointer dinamico
 
-#	$s5 contiene il contatore delle zone esplorate
+#	$s5 contiene il contatore delle celle esplorate
 #	$s6 contiene il contatore delle posizioni da 2 a 0 {si dovrà saltare la direzione di provenienza}
 #	$s7 contiene la direzione di provenienza 
 
@@ -43,7 +43,7 @@ add $s1, $s1, $t2	#sposto il puntatore sulla casella
 sb $t0, ($s1)		#salva il carattere A nel labirinto
 
 addi $a2, $zero, 4 	#direzione di provenienza nulla
-addi $s3, $zero, 1	#setta 'zone esplorate' a uno
+addi $s3, $zero, 1	#setta 'celle esplorate' a uno
 #setta le direzioni provate tutte a 'no'
 addi $s4, $zero, 0	#direzione provata? nord [1:no,0:si,2:provenienza]
 addi $s5, $zero, 0	#direzione provata? est
@@ -58,7 +58,7 @@ esplora:
 
 ricalcolaDirezione:
 #VerificaDirezione:
-#controlla se tutte le zone sono state esplorate ($s3==16)
+#controlla se tutte le celle sono state esplorate ($s3==16)
 beq $s3, 16, termina #il termina stampera' direttamente la B
 #controlla se tutte le direzioni sono state provate
 beq $s4, $zero, continua
@@ -183,7 +183,7 @@ sw $s6, 12($sp)
 sw $s5, 8($sp)
 sw $s4, 4($sp)
 sw $ra, 0($sp) #provenienza
-addi $s3, $s3, 1 #aggiungi 1 alle zone esplorate (solo quando si muove in avanti)
+addi $s3, $s3, 1 #aggiungi 1 alle celle esplorate (solo quando si muove in avanti)
 
 
 #setta la provenienza (invertita perche' dovra' essere usata dalla prossima posizione)
