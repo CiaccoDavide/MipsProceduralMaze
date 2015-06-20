@@ -10,7 +10,7 @@
 
 spbackup: .word 0
 xy: .space 2
-labirinto: .space 1157 #alloco lo spazio massimo (labirinto 16x16)
+labirinto: .space 1157 		#alloco lo spazio massimo (necessario per un labirinto 16x16)
 
 benvenuto: .asciiz "\nGeneratore procedurale di labirinti in MIPS"
 saluto: .asciiz "\nProgramma terminato!\nCreato da Ciacco Davide 794163"
@@ -58,7 +58,6 @@ init:
 
 
 	#start doppio for x,y
-
 	lb $t3, 1($t1) 			#carico la y in t2
 	mul $t3, $t3, 2
 	addi $t3, $t3, 1
@@ -67,25 +66,25 @@ init:
 		mul $t2, $t2, 2
 		addi $t2, $t2, 1
 
-	forx:
-		addi $t0, $zero, 35
-		sb $t0, ($s1)
+		forx:
+			addi $a0, $zero, 35	#carico il carattere '#' in $a0 per passarlo alla funzione storeChar
+			jal storeChar
+
+			addi $s1, $s1, 1
+			addi $t2, $t2, -1
+
+			bne $t2, $zero, forx
+
+		addi $a0, $zero, 10	#carico il carattere '\n' in $a0 per passarlo alla funzione storeChar
+		jal storeChar
 
 		addi $s1, $s1, 1
-		addi $t2, $t2, -1
+		addi $t3, $t3, -1
+		bne $t3, $zero, fory
 
-		bne $t2, $zero, forx
-
-	addi $t0, $zero, 10
-	sb $t0, ($s1)
-
-	addi $s1, $s1, 1
-	addi $t3, $t3, -1
-	bne $t3, $zero, fory
-
-	addi $t0, $zero, 0
-	sb $t0, ($s1)
-#fine vecchio reset
+	addi $a0, $zero, 0	#carico il carattere '\0' in $a0 per passarlo alla funzione storeChar
+	jal storeChar
+	#fine vecchio reset
 
 	la $s2, labirinto 	#non serve caricare subito la default finchè non si vuole fare il reset
 						#$s2 invece mi serve per calcolare l'offset sulla stringa $s1 > $s2+11
@@ -119,9 +118,9 @@ init:
 	addi $t2, $t2, 3	#(2*x)+((2*larghezza+2)*2)*y+(2*larghezza+3)
 
 	#POSIZIONO IL PUNTO DI PARTENZA
-	li $t0, 65			#carico il carattere A di partenza in $t0
-	add $s1, $s1, $t2	#sposto il puntatore sulla casella
-	sb $t0, ($s1)		#salva il carattere A nel labirinto
+	add $s1, $s1, $t2	#sposto il puntatore dinamico sulla casella di partenza
+	li $a0, 65			#carico il carattere A di partenza in $t0
+	jal storeChar		#salva il carattere A nel labirinto
 
 	addi $a2, $zero, 4 	#direzione di provenienza nulla
 	addi $s3, $zero, 1	#setta 'zone esplorate' a uno
@@ -131,13 +130,7 @@ init:
 	addi $s6, $zero, 0	#direzione provata? sud
 	addi $s7, $zero, 0	#direzione provata? ovest
 
-	j passoAvanti #passa alla funzione ricorsiva
-
-	#jal init
-	#jal genera <- il reset dello stackpointer dovrà essere fatto qui? allora anche lo store dello stackpointer
-	#j termina
-
-
+	j passoAvanti #passa alla funzione ricorsiva (probabilmente inutile visto che è posizionata subito dopo)
 
 ############################
 # PROCEDURA DI GENERAZIONE #
@@ -213,11 +206,11 @@ passoAvanti:
 
 	mul $t7, $t8, 2
 	addi $t7, $t7, 3
-	sub $t6, $s1, $s2 #$s1-$s2
-	sub $t7, $t6, $t7 #($s1-$s2)-(2*larghezza+3)
-	addi $t6, $t8, -1 #(x-1)
-	mul $t6, $t6, 2  #2*(x-1)
-	add $t7, $t7, $t6 #2*(x-1)+($s1-$s2)-(2*larghezza+3)
+	sub $t6, $s1, $s2 	#$s1-$s2
+	sub $t7, $t6, $t7 	#($s1-$s2)-(2*larghezza+3)
+	addi $t6, $t8, -1 	#(x-1)
+	mul $t6, $t6, 2  	#2*(x-1)
+	add $t7, $t7, $t6 	#2*(x-1)+($s1-$s2)-(2*larghezza+3)
 	beq $t7, $zero, ricalcolaDirezione
 
 	mul $t6, $t8, 2		# 2*larghezza
@@ -250,9 +243,9 @@ passoAvanti:
 	addi $t7, $t7, 2
 	mul $t6, $t9, 2
 	addi $t6, $t6, 2
-	mul $t7, $t7, $t6#lunghezza stringa
-	mul $t6, $t8, 2#larghezza*2
-	addi $t6, $t6, 2#larghezza*2)+2
+	mul $t7, $t7, $t6	#lunghezza stringa
+	mul $t6, $t8, 2		#larghezza*2
+	addi $t6, $t6, 2	#larghezza*2)+2
 	mul $t6, $t6, 3
 	sub $t7, $t7, $t6
 
@@ -464,8 +457,8 @@ storeChar:				# void storeChar($a0) accetta un byte per salvare il corrispondent
 #############################
 termina:	#da migliorare con menu per la scelta: 0:termina 1:reset e restart!
 
-	li $t3, 66			#carico il carattere 'B' in $t0
-	sb $t3, ($s1)		#salva il char
+	li $a0, 66			#carico il carattere B di arrivo in $a0
+	jal storeChar		#salva il carattere A nel labirinto
 
 	li $v0, 4				# selezione di print_string
 	la $a0, labirinto		# $a0 = indirizzo di string2
@@ -474,8 +467,6 @@ termina:	#da migliorare con menu per la scelta: 0:termina 1:reset e restart!
 	li $v0, 4		#stampo l'autore del programma
 	la $a0, saluto
 	syscall
-
-
 
 
 	resetStack:
