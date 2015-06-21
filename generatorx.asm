@@ -23,8 +23,8 @@ wh: .space 2				# alloco lo spazio di due byte per salvare le variabili larghezz
 labirinto: .space 1157 		# alloco lo spazio massimo (necessario per un labirinto 16x16) potevo usare sbrk per allocare dinamicamente la memoria
 
 benvenuto: .asciiz "\n ***********************************************\n * Generatore procedurale di labirinti in MIPS *\n ***********************************************\n\n"
-stringW:   .asciiz " Inserire la larghezza del labirinto [4..16]: "
-stringH:   .asciiz " Inserire l'altezza del labirinto [4..16]: "
+stringW:   .asciiz " Inserire la larghezza del labirinto [2..16]: "
+stringH:   .asciiz " Inserire l'altezza del labirinto [2..16]: "
 stringS:   .asciiz " Inserire il seed: "
 uscita:    .asciiz "\nPer terminare il programma inserire 0, per generare un nuovo labirinto inserire un qualsiasi altro intero: "
 saluto:    .asciiz "\n **********************************\n *      Programma terminato!      *\n * Creato da Ciacco Davide 794163 *\n **********************************\n\n"
