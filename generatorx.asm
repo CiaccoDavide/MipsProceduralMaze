@@ -410,6 +410,8 @@ passoIndietro:
 ###################
 # ALTRE PROCEDURE #
 ###################
+
+# SEED($a0) imposta il seed da usare nella funzione RAND (seed diverso, sequenza di numeri pseudocasuali diversa)
 seed:
 	li $v0, 4				# selezione di print_string (codice = 4)
 	la $a0, stringS			# $a0 = indirizzo di string1
@@ -423,8 +425,8 @@ seed:
 
 	jr $ra
 
-
-rand:	#restituisce in $v0 un valore pseudorandom [0..$a0]
+# RAND($a0) restituisce in $v0 un valore pseudocasuale [0..$a0]
+rand:
 	srl $t0, $s0, 3			# shift a destra di 2
 	xor $s0, $s0, $t0		# xor tra seed e shiftato
 	sll $t0, $s0, 5			# shift a sinistra di 6
@@ -435,9 +437,9 @@ rand:	#restituisce in $v0 un valore pseudorandom [0..$a0]
 	abs $v0 $t0  			# l'abs potrebbe essere semplice usando una xor?
 	jr $ra
 
-
-storeChar:				# void storeChar($a0) accetta un byte per salvare il corrispondente ascii nella stringa
-	sb $a0, ($s1)		# salva il char contenuto in $a0 #dovrei passargli anche $s1? o è una "variabile globale"?
+# STORECHAR($a0) salva il byte contenuto in $a0 nella memoria all'indirizzo indicato da $s1 (il puntatore dinamico)
+storeChar:					# void storeChar($a0) accetta un byte per salvare il corrispondente ascii nella stringa
+	sb $a0, ($s1)			# salva il char contenuto in $a0 #dovrei passargli anche $s1? o è una "variabile globale"?
 	jr $ra
 
 
